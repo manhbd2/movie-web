@@ -1,5 +1,5 @@
+/* eslint-disable prettier/prettier */
 import {
-  ProviderBuilderOptions,
   ProviderControls,
   makeProviders,
   makeSimpleProxyFetcher,
@@ -38,9 +38,9 @@ async function fetchButWithApiTokens(
     input,
     init
       ? {
-          ...init,
-          headers,
-        }
+        ...init,
+        headers,
+      }
       : undefined,
   );
   const newApiToken = response.headers.get("X-Token");
@@ -49,7 +49,7 @@ async function fetchButWithApiTokens(
 }
 
 function makeLoadBalancedSimpleProxyFetcher() {
-  const fetcher: ProviderBuilderOptions["fetcher"] = async (a, b) => {
+  const fetcher: any = async (a: any, b: any) => {
     const currentFetcher = makeSimpleProxyFetcher(
       getLoadbalancedProxyUrl(),
       fetchButWithApiTokens,

@@ -79,7 +79,7 @@ export function convertSubtitlesToObjectUrl(text: string): string {
 export function convertProviderCaption(
   captions: RunOutput["stream"]["captions"],
 ): CaptionListItem[] {
-  return captions.map((v) => ({
+  return captions.map((v: any) => ({
     language: v.language,
     url: v.url,
     needsProxy: v.hasCorsRestrictions,
