@@ -10,7 +10,6 @@ import {
 import { DetailedMeta, getMetaFromId } from "@/backend/metadata/getmeta";
 import { decodeTMDBId } from "@/backend/metadata/tmdb";
 import { MWMediaType } from "@/backend/metadata/types/mw";
-import { Button } from "@/components/buttons/Button";
 import { Icons } from "@/components/Icon";
 import { IconPill } from "@/components/layout/IconPill";
 import { Loading } from "@/components/layout/Loading";
@@ -104,14 +103,6 @@ export function MetaPart(props: MetaPartProps) {
             This media is no longer available due to a takedown notice or
             copyright claim.
           </Paragraph>
-          <Button
-            href="/"
-            theme="purple"
-            padding="md:px-12 p-2.5"
-            className="mt-6"
-          >
-            {t("player.metadata.failed.homeButton")}
-          </Button>
         </ErrorContainer>
       </ErrorLayout>
     );
@@ -126,14 +117,6 @@ export function MetaPart(props: MetaPartProps) {
           </IconPill>
           <Title>{t("player.metadata.failed.title")}</Title>
           <Paragraph>{t("player.metadata.failed.text")}</Paragraph>
-          <Button
-            href="/"
-            theme="purple"
-            padding="md:px-12 p-2.5"
-            className="mt-6"
-          >
-            {t("player.metadata.failed.homeButton")}
-          </Button>
         </ErrorContainer>
       </ErrorLayout>
     );
@@ -148,14 +131,6 @@ export function MetaPart(props: MetaPartProps) {
           </IconPill>
           <Title>{t("player.metadata.notFound.title")}</Title>
           <Paragraph>{t("player.metadata.notFound.text")}</Paragraph>
-          <Button
-            href="/"
-            theme="purple"
-            padding="md:px-12 p-2.5"
-            className="mt-6"
-          >
-            {t("player.metadata.notFound.homeButton")}
-          </Button>
         </ErrorContainer>
       </ErrorLayout>
     );

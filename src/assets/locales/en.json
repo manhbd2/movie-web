@@ -63,9 +63,9 @@
     "goHome": "Back to home"
   },
   "global": {
-    "name": "movie-web",
+    "name": "Vidsrc",
     "pages": {
-      "pagetitle": "{{title}} - movie-web",
+      "pagetitle": "{{title}} - Vidsrc",
       "dmca": "DMCA",
       "settings": "Settings",
       "about": "About",
