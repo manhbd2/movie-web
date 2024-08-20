@@ -1,5 +1,6 @@
 import { RunOutput } from "@movie-web/providers";
 import { useCallback, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { usePlayer } from "@/components/player/hooks/usePlayer";
@@ -13,7 +14,6 @@ import { PlaybackErrorPart } from "@/pages/parts/player/PlaybackErrorPart";
 import { PlayerPart } from "@/pages/parts/player/PlayerPart";
 import { ScrapeErrorPart } from "@/pages/parts/player/ScrapeErrorPart";
 import { ScrapingPart } from "@/pages/parts/player/ScrapingPart";
-import { useLastNonPlayerLink } from "@/stores/history";
 import { PlayerMeta, playerStatus } from "@/stores/player/slices/source";
 import { parseTimestamp } from "@/utils/timestamp";
 
@@ -38,7 +38,6 @@ export function PlayerView() {
     setShouldStartFromBeginning,
   } = usePlayer();
   const { setPlayerMeta, scrapeMedia } = usePlayerMeta();
-  const backUrl = useLastNonPlayerLink();
 
   const paramsData = JSON.stringify({
     media: params.media,
@@ -84,28 +83,33 @@ export function PlayerView() {
   );
 
   return (
-    <PlayerPart onMetaChange={metaChange}>
-      {status === playerStatus.IDLE ? (
-        <MetaPart onGetMeta={setPlayerMeta} />
-      ) : null}
-      {status === playerStatus.SCRAPING && scrapeMedia ? (
-        <ScrapingPart
-          media={scrapeMedia}
-          onResult={(sources, sourceOrder) => {
-            setErrorData({
-              sourceOrder,
-              sources,
-            });
-            setScrapeNotFound();
-          }}
-          onGetStream={playAfterScrape}
-        />
-      ) : null}
-      {status === playerStatus.SCRAPE_NOT_FOUND && errorData ? (
-        <ScrapeErrorPart data={errorData} />
-      ) : null}
-      {status === playerStatus.PLAYBACK_ERROR ? <PlaybackErrorPart /> : null}
-    </PlayerPart>
+    <>
+      <Helmet>
+        <title>Vidsrc</title>
+      </Helmet>
+      <PlayerPart onMetaChange={metaChange}>
+        {status === playerStatus.IDLE ? (
+          <MetaPart onGetMeta={setPlayerMeta} />
+        ) : null}
+        {status === playerStatus.SCRAPING && scrapeMedia ? (
+          <ScrapingPart
+            media={scrapeMedia}
+            onResult={(sources, sourceOrder) => {
+              setErrorData({
+                sourceOrder,
+                sources,
+              });
+              setScrapeNotFound();
+            }}
+            onGetStream={playAfterScrape}
+          />
+        ) : null}
+        {status === playerStatus.SCRAPE_NOT_FOUND && errorData ? (
+          <ScrapeErrorPart data={errorData} />
+        ) : null}
+        {status === playerStatus.PLAYBACK_ERROR ? <PlaybackErrorPart /> : null}
+      </PlayerPart>
+    </>
   );
 }
 

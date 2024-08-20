@@ -1,7 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/buttons/Button";
 import { Icons } from "@/components/Icon";
 import { IconPill } from "@/components/layout/IconPill";
 import { Title } from "@/components/text/Title";
@@ -22,14 +21,6 @@ export function NotFoundPart() {
             <IconPill icon={Icons.EYE_SLASH}>{t("notFound.badge")}</IconPill>
             <Title>{t("notFound.title")}</Title>
             <Paragraph>{t("notFound.message")}</Paragraph>
-            <Button
-              href="/"
-              theme="purple"
-              padding="md:px-12 p-2.5"
-              className="mt-6"
-            >
-              {t("notFound.goHome")}
-            </Button>
           </ErrorContainer>
         </ErrorLayout>
       </div>
