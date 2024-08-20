@@ -36,13 +36,6 @@ function LoadingScreen(props: { type: "user" | "lazy" }) {
   );
 }
 
-function TheRouter(props: { children: ReactNode }) {
-  const normalRouter = conf().NORMAL_ROUTER;
-
-  if (normalRouter) return <BrowserRouter>{props.children}</BrowserRouter>;
-  return <HashRouter>{props.children}</HashRouter>;
-}
-
 const container = document.getElementById("root");
 const root = createRoot(container!);
 
@@ -52,9 +45,9 @@ root.render(
       <HelmetProvider>
         <Suspense fallback={<LoadingScreen type="lazy" />}>
           <ThemeProvider applyGlobal>
-            <TheRouter>
+            <BrowserRouter>
               <App />
-            </TheRouter>
+            </BrowserRouter>
           </ThemeProvider>
         </Suspense>
       </HelmetProvider>
