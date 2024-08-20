@@ -1,22 +1,18 @@
-import { lazyWithPreload } from "react-lazy-with-preload";
 import { Route, Routes } from "react-router-dom";
 
 import VideoTesterView from "@/pages/developer/VideoTesterView";
 import { NotFoundPage } from "@/pages/errors/NotFoundPage";
+import PlayerView from "@/pages/PlayerView";
 import { Layout } from "@/setup/Layout";
-
-const PlayerView = lazyWithPreload(() => import("@/pages/PlayerView"));
-
-PlayerView.preload();
 
 function App() {
   return (
     <Layout>
       <Routes>
         {/* pages */}
-        <Route path="/embed/:media/:id" element={<PlayerView />} />
+        <Route path="/embed/:type/:id" element={<PlayerView />} />
         <Route
-          path="/embed/:media/:/id/:season/:episode"
+          path="/embed/:type/:/id/:season/:episode"
           element={<PlayerView />}
         />
 
