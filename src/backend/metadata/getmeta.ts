@@ -16,7 +16,7 @@ import {
   JWSeasonMetaResult,
   JW_API_BASE,
 } from "./types/justwatch";
-import { MWMediaMeta, MWMediaType } from "./types/mw";
+import { MWMediaMeta, MWMediaType, MetaRequest } from "./types/mw";
 import {
   TMDBContentTypes,
   TMDBMediaResult,
@@ -63,6 +63,13 @@ export function formatTMDBMetaResult(
   }
 
   throw new Error("unsupported type");
+}
+
+export async function getMetaFromRequest(
+  request: MetaRequest,
+): Promise<DetailedMeta | null> {
+  console.log(request);
+  return null;
 }
 
 export async function getMetaFromId(

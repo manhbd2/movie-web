@@ -7,33 +7,26 @@ import {
   fetchMetadata,
   setCachedMetadata,
 } from "@/backend/helpers/providerApi";
-import { DetailedMeta, getMetaFromId } from "@/backend/metadata/getmeta";
-import { decodeTMDBId } from "@/backend/metadata/tmdb";
-import { MWMediaType } from "@/backend/metadata/types/mw";
+import { DetailedMeta, getMetaFromRequest } from "@/backend/metadata/getmeta";
+import { MWMediaType, MetaRequest } from "@/backend/metadata/types/mw";
+import { TMDBContentTypes } from "@/backend/metadata/types/tmdb";
 import { Icons } from "@/components/Icon";
 import { IconPill } from "@/components/layout/IconPill";
 import { Loading } from "@/components/layout/Loading";
 import { Paragraph } from "@/components/text/Paragraph";
 import { Title } from "@/components/text/Title";
 import { ErrorContainer, ErrorLayout } from "@/pages/layouts/ErrorLayout";
-import { conf } from "@/setup/config";
 import { getLoadbalancedProviderApiUrl, providers } from "@/utils/providers";
 
 export interface MetaPartProps {
   onGetMeta?: (meta: DetailedMeta, episodeId?: string) => void;
 }
 
-function isDisallowedMedia(id: string, type: MWMediaType): boolean {
-  const disallowedEntries = conf().DISALLOWED_IDS.map((v) => v.split("-"));
-  if (disallowedEntries.find((entry) => id === entry[1] && type === entry[0]))
-    return true;
-  return false;
-}
-
 export function MetaPart(props: MetaPartProps) {
   const { t } = useTranslation();
   const params = useParams<{
-    media: string;
+    id: string;
+    type: TMDBContentTypes;
     episode?: string;
     season?: string;
   }>();
@@ -50,26 +43,24 @@ export function MetaPart(props: MetaPartProps) {
       ]);
     }
 
-    let data: ReturnType<typeof decodeTMDBId> = null;
-    try {
-      if (!params.media) throw new Error("no media params");
-      data = decodeTMDBId(params.media);
-    } catch {
-      // error dont matter, itll just be a 404
+    if (!params.id || !params.type) {
+      return null;
     }
-    if (!data) return null;
-
-    if (isDisallowedMedia(data.id, data.type)) throw new Error("dmca");
-
-    let meta: AsyncReturnType<typeof getMetaFromId> = null;
-    try {
-      meta = await getMetaFromId(data.type, data.id, params.season);
-    } catch (err) {
-      if ((err as any).status === 404) {
-        return null;
-      }
-      throw err;
+    if (params.season && Number.isNaN(params.season)) {
+      return null;
     }
+    if (params.episode && Number.isNaN(params.episode)) {
+      return null;
+    }
+
+    const request: MetaRequest = {
+      id: params.id,
+      type: params.type,
+      season: Number(params.season),
+      episode: Number(params.episode),
+    };
+    const meta: AsyncReturnType<typeof getMetaFromRequest> =
+      await getMetaFromRequest(request);
     if (!meta) return null;
 
     // replace link with new link if youre not already on the right link
@@ -84,7 +75,7 @@ export function MetaPart(props: MetaPartProps) {
         params.season !== meta.meta.seasonData.id ||
         params.episode !== ep.id
       ) {
-        navigate(`/media/${params.media}/${meta.meta.seasonData.id}/${ep.id}`, {
+        navigate(`/embed/${params.type}/${meta.meta.seasonData.id}/${ep.id}`, {
           replace: true,
         });
       }
