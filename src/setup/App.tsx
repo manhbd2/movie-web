@@ -86,7 +86,6 @@ function App() {
 
   return (
     <Layout>
-      <LanguageProvider />
       <Routes>
         {/* functional routes */}
         <Route path="/s/:query" element={<QuickSearch />} />
@@ -119,10 +118,6 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/about" element={<AboutPage />} />
-
-        {shouldHaveDmcaPage() ? (
-          <Route path="/dmca" element={<DmcaPage />} />
-        ) : null}
 
         {/* Settings page */}
         <Route
