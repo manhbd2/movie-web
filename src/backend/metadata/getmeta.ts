@@ -4,6 +4,8 @@ import { formatJWMeta, mediaTypeToJW } from "./justwatch";
 import {
   TMDBIdToUrlId,
   TMDBMediaToMediaType,
+  findMovieFromExternalId,
+  findShowFromExternalId,
   formatTMDBMeta,
   getEpisodes,
   getMediaDetails,
@@ -18,6 +20,7 @@ import {
 } from "./types/justwatch";
 import { MWMediaMeta, MWMediaType, MetaRequest } from "./types/mw";
 import {
+  ResultMovieModel,
   TMDBContentTypes,
   TMDBMediaResult,
   TMDBMovieData,
@@ -33,25 +36,25 @@ export interface DetailedMeta {
 }
 
 export function formatTMDBMetaResult(
-  details: TMDBShowData | TMDBMovieData,
-  type: MWMediaType,
+  details: TMDBShowData | TMDBMovieData | ResultMovieModel,
+  type: TMDBContentTypes,
 ): TMDBMediaResult {
-  if (type === MWMediaType.MOVIE) {
+  if (type === TMDBContentTypes.MOVIE) {
     const movie = details as TMDBMovieData;
     return {
       id: details.id,
+      object_type: type,
       title: movie.title,
-      object_type: mediaTypeToTMDB(type),
       poster: getMediaPoster(movie.poster_path) ?? undefined,
       original_release_year: new Date(movie.release_date).getFullYear(),
     };
   }
-  if (type === MWMediaType.SERIES) {
+  if (type === TMDBContentTypes.TV) {
     const show = details as TMDBShowData;
     return {
       id: details.id,
       title: show.name,
-      object_type: mediaTypeToTMDB(type),
+      object_type: type,
       seasons: show.seasons.map((v) => ({
         id: v.id,
         season_number: v.season_number,
@@ -65,19 +68,11 @@ export function formatTMDBMetaResult(
   throw new Error("unsupported type");
 }
 
-export async function getMetaFromRequest(
+export async function getMetaFromId(
   request: MetaRequest,
 ): Promise<DetailedMeta | null> {
-  console.log(request);
-  return null;
-}
-
-export async function getMetaFromId(
-  type: MWMediaType,
-  id: string,
-  seasonId?: string,
-): Promise<DetailedMeta | null> {
-  const details = await getMediaDetails(id, mediaTypeToTMDB(type));
+  const { id, type, season } = request;
+  const details = await getMediaDetails(id, type);
 
   if (!details) return null;
 
@@ -85,10 +80,10 @@ export async function getMetaFromId(
 
   let seasonData: TMDBSeasonMetaResult | undefined;
 
-  if (type === MWMediaType.SERIES) {
+  if (type === TMDBContentTypes.TV) {
     const seasons = (details as TMDBShowData).seasons;
 
-    let selectedSeason = seasons.find((v) => v.id.toString() === seasonId);
+    let selectedSeason = seasons.find((v) => v.season_number === season);
     if (!selectedSeason) {
       selectedSeason = seasons.find((v) => v.season_number === 1);
     }
@@ -118,6 +113,29 @@ export async function getMetaFromId(
     imdbId,
     tmdbId: id,
   };
+}
+
+export async function getMetaFromRequest(
+  request: MetaRequest,
+): Promise<DetailedMeta | null> {
+  const { id, type } = request;
+  if (id.startsWith("tt") && type === TMDBContentTypes.MOVIE) {
+    const movieResponse = await findMovieFromExternalId(id, "imdb_id");
+    if (!movieResponse) return null;
+    const tmdbMeta = formatTMDBMetaResult(movieResponse, type);
+    return {
+      imdbId: id,
+      tmdbId: movieResponse.id.toString(),
+      meta: formatTMDBMeta(tmdbMeta),
+    };
+  }
+  if (id.startsWith("tt") && type === TMDBContentTypes.TV) {
+    const showResponse = await findShowFromExternalId(id, "imdb_id");
+    if (!showResponse) return null;
+    request.id = showResponse.id.toString();
+  }
+
+  return getMetaFromId(request);
 }
 
 export async function getLegacyMetaFromId(
