@@ -24,14 +24,6 @@ export function PlaybackErrorPart() {
         <Paragraph>{t("player.playbackError.text")}</Paragraph>
         <div className="flex gap-3">
           <Button
-            href="/"
-            theme="secondary"
-            padding="md:px-12 p-2.5"
-            className="mt-6"
-          >
-            {t("player.playbackError.homeButton")}
-          </Button>
-          <Button
             onClick={() => modal.show()}
             theme="purple"
             padding="md:px-12 p-2.5"
