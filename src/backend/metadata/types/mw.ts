@@ -58,4 +58,5 @@ export interface MetaRequest {
   type: TMDBContentTypes;
   season?: number | undefined;
   episode?: number | undefined;
+  seasonId?: string | undefined;
 }

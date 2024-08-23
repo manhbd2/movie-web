@@ -1,7 +1,15 @@
-import { DetailedMeta, getMetaFromId } from "@/backend/metadata/getmeta";
+import { DetailedMeta, getMetaFromRequest } from "@/backend/metadata/getmeta";
 import { searchForMedia } from "@/backend/metadata/search";
-import { mediaItemTypeToMediaType } from "@/backend/metadata/tmdb";
-import { MWMediaMeta, MWMediaType } from "@/backend/metadata/types/mw";
+import {
+  mediaItemTypeToMediaType,
+  mediaTypeToTMDB,
+} from "@/backend/metadata/tmdb";
+import {
+  MWMediaMeta,
+  MWMediaType,
+  MetaRequest,
+} from "@/backend/metadata/types/mw";
+import { TMDBContentTypes } from "@/backend/metadata/types/tmdb";
 import { compareTitle } from "@/stores/__old/utils";
 
 import { WatchedStoreData, WatchedStoreItem } from "../types";
@@ -71,7 +79,11 @@ async function getMetas(
 
     let keys: (string | null)[][] = [["0", "0"]];
     if (item.data.type === "show") {
-      const meta = await getMetaFromId(MWMediaType.SERIES, item.data.id);
+      const request: MetaRequest = {
+        id: item.data.id,
+        type: TMDBContentTypes.TV,
+      };
+      const meta = await getMetaFromRequest(request);
       if (!meta || !meta?.meta.seasons) return;
       const seasonNumbers = [
         ...new Set(
@@ -95,11 +107,12 @@ async function getMetas(
     await Promise.all(
       keys.map(async ([key, id]) => {
         if (!key) return;
-        mediaMetas[item.id][key] = await getMetaFromId(
-          mediaItemTypeToMediaType(item.data.type),
-          item.data.id,
-          id === "0" || id === null ? undefined : id,
-        );
+        const request: MetaRequest = {
+          id: item.data.id,
+          seasonId: id === "0" || id === null ? undefined : id,
+          type: mediaTypeToTMDB(mediaItemTypeToMediaType(item.data.type)),
+        };
+        mediaMetas[item.id][key] = await getMetaFromRequest(request);
       }),
     );
   }

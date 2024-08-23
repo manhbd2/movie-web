@@ -11,7 +11,6 @@ import {
   getMediaDetails,
   getMediaPoster,
   getMovieFromExternalId,
-  mediaTypeToTMDB,
 } from "./tmdb";
 import {
   JWDetailedMeta,
@@ -71,7 +70,7 @@ export function formatTMDBMetaResult(
 export async function getMetaFromId(
   request: MetaRequest,
 ): Promise<DetailedMeta | null> {
-  const { id, type, season } = request;
+  const { id, type, season, seasonId } = request;
   const details = await getMediaDetails(id, type);
 
   if (!details) return null;
@@ -83,7 +82,10 @@ export async function getMetaFromId(
   if (type === TMDBContentTypes.TV) {
     const seasons = (details as TMDBShowData).seasons;
 
-    let selectedSeason = seasons.find((v) => v.season_number === season);
+    let selectedSeason = seasons.find(
+      (item) =>
+        item.season_number === season || item.id.toString() === seasonId,
+    );
     if (!selectedSeason) {
       selectedSeason = seasons.find((v) => v.season_number === 1);
     }

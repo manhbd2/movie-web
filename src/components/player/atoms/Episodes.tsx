@@ -3,8 +3,13 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAsync } from "react-use";
 
-import { getMetaFromId } from "@/backend/metadata/getmeta";
-import { MWMediaType, MWSeasonMeta } from "@/backend/metadata/types/mw";
+import { getMetaFromRequest } from "@/backend/metadata/getmeta";
+import {
+  MWMediaType,
+  MWSeasonMeta,
+  MetaRequest,
+} from "@/backend/metadata/types/mw";
+import { TMDBContentTypes } from "@/backend/metadata/types/tmdb";
 import { Icons } from "@/components/Icon";
 import { ProgressRing } from "@/components/layout/ProgressRing";
 import { OverlayAnchor } from "@/components/overlays/OverlayAnchor";
@@ -31,7 +36,12 @@ function useSeasonData(mediaId: string, seasonId: string) {
   const [seasons, setSeason] = useState<MWSeasonMeta[] | null>(null);
 
   const state = useAsync(async () => {
-    const data = await getMetaFromId(MWMediaType.SERIES, mediaId, seasonId);
+    const request: MetaRequest = {
+      seasonId,
+      id: mediaId,
+      type: TMDBContentTypes.TV,
+    };
+    const data = await getMetaFromRequest(request);
     if (data?.meta.type !== MWMediaType.SERIES) return null;
     setSeason(data.meta.seasons);
     return {
