@@ -5,17 +5,19 @@ import { NotFoundPage } from "@/pages/errors/NotFoundPage";
 import PlayerView from "@/pages/PlayerView";
 import { Layout } from "@/setup/Layout";
 
+const embedPaths = [
+  "/embed/:type/:id",
+  "/embed/:type/:id/:season",
+  "/embed/:type/:id/:season/:episode",
+];
 function App() {
   return (
     <Layout>
       <Routes>
         {/* pages */}
-        <Route path="/embed/:type/:id" element={<PlayerView />} />
-        <Route
-          path="/embed/:type/:/id/:season/:episode"
-          element={<PlayerView />}
-        />
-
+        {embedPaths.map((path) => (
+          <Route path={path} key={path} element={<PlayerView />} />
+        ))}
         {/* other */}
         <Route path="/dev/video" element={<VideoTesterView />} />
         <Route path="*" element={<NotFoundPage />} />
