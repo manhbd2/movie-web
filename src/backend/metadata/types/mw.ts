@@ -60,3 +60,12 @@ export interface MetaRequest {
   episode?: number | undefined;
   seasonId?: string | undefined;
 }
+
+export interface IServer {
+  name: string;
+  hash: string;
+}
+
+export interface IServerResponse {
+  data: IServer[];
+}

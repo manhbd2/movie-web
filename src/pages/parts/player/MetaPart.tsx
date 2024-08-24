@@ -3,20 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "react-use";
 import type { AsyncReturnType } from "type-fest";
 
-import {
-  fetchMetadata,
-  setCachedMetadata,
-} from "@/backend/helpers/providerApi";
 import { DetailedMeta, getMetaFromRequest } from "@/backend/metadata/getmeta";
-import { MWMediaType, MetaRequest } from "@/backend/metadata/types/mw";
+import { IServer, MWMediaType, MetaRequest } from "@/backend/metadata/types/mw";
 import { TMDBContentTypes } from "@/backend/metadata/types/tmdb";
+import { getServers } from "@/backend/metadata/vidsrc";
 import { Icons } from "@/components/Icon";
 import { IconPill } from "@/components/layout/IconPill";
 import { Loading } from "@/components/layout/Loading";
 import { Paragraph } from "@/components/text/Paragraph";
 import { Title } from "@/components/text/Title";
 import { ErrorContainer, ErrorLayout } from "@/pages/layouts/ErrorLayout";
-import { getLoadbalancedProviderApiUrl, providers } from "@/utils/providers";
 
 export interface MetaPartProps {
   onGetMeta?: (meta: DetailedMeta, episodeId?: string) => void;
@@ -33,16 +29,6 @@ export function MetaPart(props: MetaPartProps) {
   const navigate = useNavigate();
 
   const { error, value, loading } = useAsync(async () => {
-    const providerApiUrl = getLoadbalancedProviderApiUrl();
-    if (providerApiUrl) {
-      await fetchMetadata(providerApiUrl);
-    } else {
-      setCachedMetadata([
-        ...providers.listSources(),
-        ...providers.listEmbeds(),
-      ]);
-    }
-
     if (!params.id || !params.type) {
       return null;
     }
@@ -63,6 +49,8 @@ export function MetaPart(props: MetaPartProps) {
       await getMetaFromRequest(request);
     if (!meta) return null;
 
+    const servers: IServer[] = await getServers(request);
+    console.log(servers);
     // replace link with new link if youre not already on the right link
     let epId = params.episode;
     if (meta.meta.type === MWMediaType.SERIES) {
@@ -83,7 +71,6 @@ export function MetaPart(props: MetaPartProps) {
         );
       }
     }
-
     props.onGetMeta?.(meta, epId);
   }, []);
 

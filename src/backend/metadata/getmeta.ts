@@ -86,6 +86,11 @@ export async function getMetaFromId(
       (item) =>
         item.season_number === season || item.id.toString() === seasonId,
     );
+
+    if (request.season && !selectedSeason) {
+      return null;
+    }
+
     if (!selectedSeason) {
       selectedSeason = seasons.find((v) => v.season_number === 1);
     }
@@ -102,6 +107,13 @@ export async function getMetaFromId(
         title: selectedSeason.name,
         episodes,
       };
+    }
+
+    if (request.episode) {
+      const episode = seasonData?.episodes.find(
+        (item) => item.episode_number === request.episode,
+      );
+      if (!episode) return null;
     }
   }
 

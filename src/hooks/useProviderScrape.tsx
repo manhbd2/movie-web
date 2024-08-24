@@ -5,12 +5,8 @@ import {
 } from "@movie-web/providers";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  connectServerSideEvents,
-  getCachedMetadata,
-  makeProviderUrl,
-} from "@/backend/helpers/providerApi";
-import { getLoadbalancedProviderApiUrl, providers } from "@/utils/providers";
+import { getCachedMetadata } from "@/backend/helpers/providerApi";
+import { providers } from "@/utils/providers";
 
 export interface ScrapingItems {
   id: string;
@@ -152,23 +148,6 @@ export function useScrape() {
 
   const startScraping = useCallback(
     async (media: ScrapeMedia) => {
-      const providerApiUrl = getLoadbalancedProviderApiUrl();
-      if (providerApiUrl) {
-        startScrape();
-        const baseUrlMaker = makeProviderUrl(providerApiUrl);
-        const conn = await connectServerSideEvents<RunOutput | "">(
-          baseUrlMaker.scrapeAll(media),
-          ["completed", "noOutput"],
-        );
-        conn.on("init", initEvent);
-        conn.on("start", startEvent);
-        conn.on("update", updateEvent);
-        conn.on("discoverEmbeds", discoverEmbedsEvent);
-        const sseOutput = await conn.promise();
-
-        return getResult(sseOutput === "" ? null : sseOutput);
-      }
-
       if (!providers) return null;
       startScrape();
       const output = await providers.runAll({
@@ -180,6 +159,7 @@ export function useScrape() {
           discoverEmbeds: discoverEmbedsEvent,
         },
       });
+      console.log(output);
       return getResult(output);
     },
     [
