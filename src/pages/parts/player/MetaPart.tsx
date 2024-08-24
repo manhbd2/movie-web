@@ -75,9 +75,12 @@ export function MetaPart(props: MetaPartProps) {
         params.season !== meta.meta.seasonData.id ||
         params.episode !== ep.id
       ) {
-        navigate(`/embed/${params.type}/${meta.meta.seasonData.id}/${ep.id}`, {
-          replace: true,
-        });
+        navigate(
+          `/embed/${params.type}/${params.id}/${meta.meta.seasonData.number}/${ep.number}`,
+          {
+            replace: true,
+          },
+        );
       }
     }
 
