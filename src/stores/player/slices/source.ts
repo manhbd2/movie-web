@@ -1,5 +1,6 @@
 import { ScrapeMedia } from "@movie-web/providers";
 
+import { IServer } from "@/backend/metadata/types/mw";
 import { MakeSlice } from "@/stores/player/slices/types";
 import {
   SourceQuality,
@@ -39,6 +40,7 @@ export interface PlayerMeta {
     tmdbId: string;
     title: string;
   };
+  servers: IServer[];
 }
 
 export interface Caption {
@@ -90,6 +92,7 @@ export function metaToScrapeMedia(meta: PlayerMeta): ScrapeMedia {
       imdbId: meta.imdbId,
       episode: meta.episode,
       season: meta.season,
+      servers: meta.servers,
     };
   }
 
@@ -99,6 +102,7 @@ export function metaToScrapeMedia(meta: PlayerMeta): ScrapeMedia {
     tmdbId: meta.tmdbId,
     type: "movie",
     imdbId: meta.imdbId,
+    servers: meta.servers,
   };
 }
 

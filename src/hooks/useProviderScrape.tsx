@@ -6,7 +6,7 @@ import {
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { getCachedMetadata } from "@/backend/helpers/providerApi";
-import { providers } from "@/utils/providers";
+import { IServer } from "@/backend/metadata/types/mw";
 
 export interface ScrapingItems {
   id: string;
@@ -32,6 +32,30 @@ function useBaseScrape() {
   const [sourceOrder, setSourceOrder] = useState<ScrapingItems[]>([]);
   const [currentSource, setCurrentSource] = useState<string>();
   const lastId = useRef<string | null>(null);
+
+  const initSourceOrder = useCallback((servers: IServer[]) => {
+    setSources(
+      servers
+        .map((server: IServer) => {
+          return {
+            percentage: 0,
+            id: server.hash,
+            name: server.name,
+            status: "waiting",
+          } as ScrapingSegment;
+        })
+        .reduce<Record<string, ScrapingSegment>>(
+          (accumulator, currentValue) => {
+            accumulator[currentValue.id] = currentValue;
+            return accumulator;
+          },
+          {},
+        ),
+    );
+    setSourceOrder(
+      servers.map((server: IServer) => ({ id: server.hash, children: [] })),
+    );
+  }, []);
 
   const initEvent = useCallback((evt: ScraperEvent<"init">) => {
     setSources(
@@ -127,6 +151,7 @@ function useBaseScrape() {
     discoverEmbedsEvent,
     startScrape,
     getResult,
+    initSourceOrder,
     sources,
     sourceOrder,
     currentSource,
@@ -144,32 +169,25 @@ export function useScrape() {
     getResult,
     startEvent,
     startScrape,
+    initSourceOrder,
   } = useBaseScrape();
 
   const startScraping = useCallback(
     async (media: ScrapeMedia) => {
-      if (!providers) return null;
       startScrape();
-      const output = await providers.runAll({
-        media,
-        events: {
-          init: initEvent,
-          start: startEvent,
-          update: updateEvent,
-          discoverEmbeds: discoverEmbedsEvent,
-        },
-      });
-      console.log(output);
-      return getResult(output);
+      initSourceOrder(media.servers);
+      // const output = await providers.runAll({
+      //   media,
+      //   events: {
+      //     init: initEvent,
+      //     start: startEvent,
+      //     update: updateEvent,
+      //     discoverEmbeds: discoverEmbedsEvent,
+      //   },
+      // });
+      return getResult(null);
     },
-    [
-      initEvent,
-      startEvent,
-      updateEvent,
-      discoverEmbedsEvent,
-      getResult,
-      startScrape,
-    ],
+    [getResult, startScrape, initSourceOrder],
   );
 
   return {

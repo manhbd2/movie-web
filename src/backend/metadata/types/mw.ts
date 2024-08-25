@@ -3,7 +3,6 @@ import { TMDBContentTypes } from "./tmdb";
 export enum MWMediaType {
   MOVIE = "movie",
   SERIES = "series",
-  ANIME = "anime",
 }
 
 export type MWSeasonMeta = {
@@ -32,7 +31,7 @@ type MWMediaMetaBase = {
 
 type MWMediaMetaSpecific =
   | {
-      type: MWMediaType.MOVIE | MWMediaType.ANIME;
+      type: MWMediaType.MOVIE;
       seasons: undefined;
     }
   | {

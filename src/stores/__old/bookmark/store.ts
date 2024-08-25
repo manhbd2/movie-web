@@ -7,7 +7,6 @@ import { OldBookmarks, migrateV1Bookmarks } from "../watched/migrations/v2";
 import { migrateV2Bookmarks } from "../watched/migrations/v3";
 
 const typeMap: Record<MWMediaType, "show" | "movie" | null> = {
-  [MWMediaType.ANIME]: null,
   [MWMediaType.MOVIE]: "movie",
   [MWMediaType.SERIES]: "show",
 };

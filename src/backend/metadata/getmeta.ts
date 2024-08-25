@@ -17,7 +17,7 @@ import {
   JWSeasonMetaResult,
   JW_API_BASE,
 } from "./types/justwatch";
-import { MWMediaMeta, MWMediaType, MetaRequest } from "./types/mw";
+import { IServer, MWMediaMeta, MWMediaType, MetaRequest } from "./types/mw";
 import {
   ResultMovieModel,
   TMDBContentTypes,
@@ -32,6 +32,7 @@ export interface DetailedMeta {
   meta: MWMediaMeta;
   imdbId?: string;
   tmdbId?: string;
+  servers: IServer[];
 }
 
 export function formatTMDBMetaResult(
@@ -126,6 +127,7 @@ export async function getMetaFromId(
     meta,
     imdbId,
     tmdbId: id,
+    servers: [],
   };
 }
 
@@ -141,6 +143,7 @@ export async function getMetaFromRequest(
       imdbId: id,
       tmdbId: movieResponse.id.toString(),
       meta: formatTMDBMeta(tmdbMeta),
+      servers: [],
     };
   }
   if (id.startsWith("tt") && type === TMDBContentTypes.TV) {
@@ -197,6 +200,7 @@ export async function getLegacyMetaFromId(
     meta: formatJWMeta(data, seasonData),
     imdbId,
     tmdbId,
+    servers: [],
   };
 }
 

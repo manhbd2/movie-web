@@ -26,10 +26,11 @@ export function MetaPart(props: MetaPartProps) {
     episode?: string;
     season?: string;
   }>();
+  const { id, type } = params;
   const navigate = useNavigate();
 
   const { error, value, loading } = useAsync(async () => {
-    if (!params.id || !params.type) {
+    if (!id || !type) {
       return null;
     }
     if (params.season && Number.isNaN(params.season)) {
@@ -40,8 +41,8 @@ export function MetaPart(props: MetaPartProps) {
     }
 
     const request: MetaRequest = {
-      id: params.id,
-      type: params.type,
+      id,
+      type,
       season: Number(params.season),
       episode: Number(params.episode),
     };
@@ -50,28 +51,48 @@ export function MetaPart(props: MetaPartProps) {
     if (!meta) return null;
 
     const servers: IServer[] = await getServers(request);
-    console.log(servers);
-    // replace link with new link if youre not already on the right link
-    let epId = params.episode;
-    if (meta.meta.type === MWMediaType.SERIES) {
-      let ep = meta.meta.seasonData.episodes.find(
-        (v) => v.id === params.episode,
-      );
-      if (!ep) ep = meta.meta.seasonData.episodes[0];
-      epId = ep.id;
-      if (
-        params.season !== meta.meta.seasonData.id ||
-        params.episode !== ep.id
-      ) {
-        navigate(
-          `/embed/${params.type}/${params.id}/${meta.meta.seasonData.number}/${ep.number}`,
-          {
-            replace: true,
-          },
-        );
-      }
+    if (!servers?.length) {
+      return null;
     }
-    props.onGetMeta?.(meta, epId);
+
+    meta.servers = servers;
+    if (meta.meta.type !== MWMediaType.SERIES) {
+      props.onGetMeta?.(meta);
+      return;
+    }
+
+    const {
+      meta: { seasonData },
+    } = meta;
+    const { episodes } = seasonData;
+    const seasonNumber = seasonData.number;
+    const episodeNumber = episodes[0].number;
+
+    // not season and not episode
+    if (!params.season && !params.episode) {
+      navigate(`/embed/${type}/${id}/${seasonNumber}/${episodeNumber}`, {
+        replace: true,
+      });
+      props.onGetMeta?.(meta, episodes[0].id);
+      return;
+    }
+
+    // replace link with new link if youre not already on the right link
+    let episodeId: string = "";
+    if (params.episode && Number.isNaN(params.episode)) {
+      const episode = episodes.find(
+        (i) => i.number.toString() === params.episode,
+      );
+      if (!episode?.id) return null;
+      episodeId = episode.id;
+    } else {
+      episodeId = episodes[0].id;
+      navigate(`/embed/${type}/${id}/${seasonNumber}/${episodes[0].number}`, {
+        replace: true,
+      });
+    }
+
+    props.onGetMeta?.(meta, episodeId);
   }, []);
 
   if (error && error.message === "dmca") {

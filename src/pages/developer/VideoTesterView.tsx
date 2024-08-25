@@ -15,6 +15,7 @@ const testMeta: PlayerMeta = {
   title: "Sintel",
   tmdbId: "",
   type: "movie",
+  servers: [],
 };
 
 const testStreams: Record<StreamType, string> = {

@@ -51,6 +51,7 @@ export function usePlayerMeta() {
             title: m.meta.seasonData.title,
             tmdbId: m.meta.seasonData.id,
           },
+          servers: m.servers,
         };
       } else {
         playerMeta = {
@@ -60,8 +61,10 @@ export function usePlayerMeta() {
           poster: m.meta.poster,
           tmdbId: m.tmdbId ?? "",
           imdbId: m.imdbId,
+          servers: m.servers,
         };
       }
+
       setDirectMeta(playerMeta);
       return playerMeta;
     },
