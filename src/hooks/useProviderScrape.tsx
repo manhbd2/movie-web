@@ -1,12 +1,16 @@
+/* eslint-disable no-plusplus */
 import {
   FullScraperEvents,
   RunOutput,
   ScrapeMedia,
+  Stream,
+  flags,
 } from "@movie-web/providers";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { getCachedMetadata } from "@/backend/helpers/providerApi";
-import { IServer } from "@/backend/metadata/types/mw";
+import { IServer, ISources, ISubtitle } from "@/backend/metadata/types/mw";
+import { getSources } from "@/backend/metadata/vidsrc";
 
 export interface ScrapingItems {
   id: string;
@@ -91,9 +95,9 @@ function useBaseScrape() {
   const updateEvent = useCallback((evt: ScraperEvent<"update">) => {
     setSources((s) => {
       if (s[evt.id]) {
+        s[evt.id].error = evt.error;
         s[evt.id].status = evt.status;
         s[evt.id].reason = evt.reason;
-        s[evt.id].error = evt.error;
         s[evt.id].percentage = evt.percentage;
       }
       return { ...s };
@@ -164,8 +168,6 @@ export function useScrape() {
     sourceOrder,
     currentSource,
     updateEvent,
-    discoverEmbedsEvent,
-    initEvent,
     getResult,
     startEvent,
     startScrape,
@@ -176,18 +178,65 @@ export function useScrape() {
     async (media: ScrapeMedia) => {
       startScrape();
       initSourceOrder(media.servers);
-      // const output = await providers.runAll({
-      //   media,
-      //   events: {
-      //     init: initEvent,
-      //     start: startEvent,
-      //     update: updateEvent,
-      //     discoverEmbeds: discoverEmbedsEvent,
-      //   },
-      // });
-      return getResult(null);
+      let result: RunOutput | null = null;
+      for (let i = 0; i < media.servers.length; i++) {
+        startEvent(media.servers[i].hash);
+        const server: IServer = media.servers[i];
+        try {
+          const response: ISources = await getSources(server.hash);
+          if (response.source.length) {
+            const stream: Stream = {
+              type: "hls",
+              id: server.hash,
+              playlist: response.source,
+              flags: [flags.CORS_ALLOWED],
+              captions: response.subtitles?.length
+                ? response.subtitles.map((subtitle: ISubtitle) => {
+                    return {
+                      type: "vtt",
+                      id: subtitle.label,
+                      url: subtitle.file,
+                      language: subtitle.label,
+                      hasCorsRestrictions: false,
+                    };
+                  })
+                : [],
+            };
+            result = {
+              stream,
+              sourceId: server.hash,
+            } as RunOutput;
+            break;
+          } else {
+            const failure: ScraperEvent<"update"> = {
+              id: server.hash,
+              status: "failure",
+              error: "source not found",
+              reason: "Failed to fetch source",
+              percentage: 100,
+            };
+            updateEvent(failure);
+          }
+        } catch (error) {
+          let errorMessage: string = "";
+          if (typeof error === "string") {
+            errorMessage = error;
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+          const failure: ScraperEvent<"update"> = {
+            id: server.hash,
+            status: "failure",
+            error: errorMessage,
+            reason: "Failed to fetch source",
+            percentage: 100,
+          };
+          updateEvent(failure);
+        }
+      }
+      return getResult(result);
     },
-    [getResult, startScrape, initSourceOrder],
+    [getResult, startEvent, updateEvent, startScrape, initSourceOrder],
   );
 
   return {

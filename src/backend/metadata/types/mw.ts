@@ -68,3 +68,18 @@ export interface IServer {
 export interface IServerResponse {
   data: IServer[];
 }
+
+export interface ISubtitle {
+  file: string;
+  label: string;
+}
+
+export interface ISources {
+  source: string;
+  thumbnails: string;
+  subtitles: ISubtitle[];
+}
+
+export interface ISourceResponse {
+  data: ISources;
+}
