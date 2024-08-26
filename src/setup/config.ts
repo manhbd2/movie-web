@@ -18,6 +18,7 @@ interface Config {
   BACKEND_URL: string;
   DISALLOWED_IDS: string;
   TURNSTILE_KEY: string;
+  VITE_SERVICE_URL: string;
 }
 
 export interface RuntimeConfig {
@@ -32,6 +33,7 @@ export interface RuntimeConfig {
   BACKEND_URL: string;
   DISALLOWED_IDS: string[];
   TURNSTILE_KEY: string | null;
+  VITE_SERVICE_URL: string;
 }
 
 const env: Record<keyof Config, undefined | string> = {
@@ -46,6 +48,7 @@ const env: Record<keyof Config, undefined | string> = {
   BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
   DISALLOWED_IDS: import.meta.env.VITE_DISALLOWED_IDS,
   TURNSTILE_KEY: import.meta.env.VITE_TURNSTILE_KEY,
+  VITE_SERVICE_URL: import.meta.env.VITE_SERVICE_URL,
 };
 
 // loads from different locations, in order: environment (VITE_{KEY}), window (public/config.js)
@@ -78,6 +81,7 @@ export function conf(): RuntimeConfig {
     PROXY_URLS: getKey("CORS_PROXY_URL")
       .split(",")
       .map((v) => v.trim()),
+    VITE_SERVICE_URL: getKey("VITE_SERVICE_URL"),
     NORMAL_ROUTER: getKey("NORMAL_ROUTER", "false") === "true",
     TURNSTILE_KEY: turnstileKey.length > 0 ? turnstileKey : null,
     DISALLOWED_IDS: getKey("DISALLOWED_IDS", "")

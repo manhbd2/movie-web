@@ -1,12 +1,15 @@
+import { conf } from "@/setup/config";
+
 import {
   IServer,
   IServerResponse,
+  ISourceResponse,
+  ISources,
   MetaRequest,
-  SourceResponse,
 } from "./types/mw";
 import { mwFetch } from "../helpers/fetch";
 
-const baseURL: string = "http://localhost:3001/api";
+const baseURL: string = conf().VITE_SERVICE_URL;
 
 const headers = {
   accept: "application/json",
@@ -29,7 +32,7 @@ export async function getServers(request: MetaRequest): Promise<IServer[]> {
   return data.data;
 }
 
-export async function getSources(hash: string): Promise<SourceResponse> {
-  const data = await get<SourceResponse>(`/source/${hash}`);
+export async function getSources(hash: string): Promise<ISources> {
+  const data = await get<ISourceResponse>(`/source/${hash}`);
   return data.data;
 }
